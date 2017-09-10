@@ -1,0 +1,104 @@
+1.  Given this table of values, which data types and meanings are the same? Which are different?
+
+values
+
+| number | value | | ------ | ------ | | 1 | Chen | | 2 | Jones | | 3 | 42 | | 4 | Viola Davis |
+
+***
+    All the number meanings are the same data types - such as 1, 2, 3, 4 -> integer
+    For the values: 1-Chen, 2-Jones, and 4-Viola are the same -> string
+                    3-42 is the only differing value -> integer
+
+2.  Explain in your own words when a database might be used. Explain when a text file might be used.
+
+***
+    A database might be used when dealing with massage amounts of data which needs indexing and efficient
+    storage. A database will allow for accessing the data quickly and easily, as well as preventing duplication
+    of existing information by centralizing all the information.
+
+    A text file might be used when you are simply grabbing all the data and dumping it to the screen, since it might
+    even be faster than using a database for this purpose.  On benefit is that text files never crash, a database
+    can.  Also, if there is not massive amounts of data, text files may be preferred since they can be read and
+    edited with any tool you prefer and at any stage of the software development or production.
+
+3.  Describe one difference between SQL and other programming languages.
+
+***
+    One difference is that SQL is considered declarative rather than a procedural language.  For a procedural
+    language you would write lines of code that perform one operation after another until the program completes.
+    The programmer will specify what will be done and how to do it.  With SQL, you will tell it what to do without
+    specifying exactly how to accomplish the task.  The DBMS, not the programmer will decide the best way to
+    perform the job.
+
+4.  In your own words, explain how the pieces of a database system fit together at a high level.
+
+***
+    A database is an organized collection of data.  It is a collection of schemas, tables, queries, and
+    other objects.  The tables are made up of rows and columns that hold the data.  Each row is uniquely
+    identified by a primary key, usually a single column, such as employeeID, for example.  The purpose
+    of the primary key is to uniquely identify each row in the database and no two rows can have the same
+    primary key.  This allows you to select any row by just knowing the primary key.  The columns will hold
+    specific types of data, such as integers or strings.  A column will usually be defined by its name and
+    data type.  So, the primary key of a row can be used to access any data of the columns quickly and
+    efficiently.
+
+5.  Explain the meaning of table, row, column, and value.
+
+***
+    A database table is basically a table with rows and columns. Different tables contain information
+    about different types of things.
+    Each row in a database table represents one instance of the type of object described in the table.
+    The columns in a table are the collections of data that we will keep track of about the type of object.
+    The values can be considered the data elements and these values for each column will be of the same
+    data type.
+
+6.  List 3 data types that can be used in a table.
+
+***
+    Integers(INT), Character(CHAR), boolean
+
+7.  Given the Payments table below, answer the following questions:
+
+What is the result, if we select all the dates and amounts?
+
+***
+    | 5/1/2016  | 1500.00 |
+    | 5/10/2016 | 37.00   |
+    | 5/15/2016 | 124.93  |
+    | 5/23/2016 | 54.72   |
+
+What is the result, if we select all amounts greater than 500?
+
+***
+    | 1500.00 |
+
+What is the result, be if we select all purchases made at Mega Foods?
+
+***
+    | Groceries|
+
+8.  Given the users table below, write the following SQL queries and their results:
+
+Select the email and sign-up date for the user named DeAndre Data.
+
+***
+
+  SELECT email, signup
+  FROM users
+  WHERE name = 'DeAndre Data';
+
+Select the user ID for the user with email 'aleesia.algorithm@uw.edu'.
+
+***
+
+  SELECT userid
+  FROM users
+  WHERE email = 'aleesai.alorithm.edu';
+
+Select all the columns for the user ID equal to 4.
+
+***
+
+  SELECT *
+  FROM users
+  WHERE userid = 4;
