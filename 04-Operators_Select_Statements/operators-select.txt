@@ -1,0 +1,297 @@
+1. Write out a generic SELECT statement.
+
+    SELECT column1
+    FROM table
+    WHERE id = 5;
+
+2. Create a fun way to remember the order of operations in a SELECT statement, such as a mnemonic.
+
+      Sweaty Feet Will Give Horrible Odors - SELECT, FROM, WHERE, GROUP BY, HAVING, ORDER By
+
+
+3. Create a pets database. Create a dogs table using this file. From the dogs table with
+    the columns id, name, gender, age, weight, intake_date, breed, and in_foster,
+    write statements to select the following pieces of data.
+
+ A. Display the name, gender, and age of all dogs that are part Labrador.
+
+      SELECT name, gender, age
+      FROM dogs
+      WHERE breed LIKE '%labrador'%;
+
+      RESULTS:
+        name  | gender | age
+      --------+--------+-----
+      Boujee  | F      |   3
+      Marley  | M      |   0
+
+ B. Display the ids of all dogs that are under 1 year old.
+
+      SELECT id
+      FROM dogs
+      WHERE age < 1;
+
+      RESULTS:
+        id
+      -------
+       10002
+       10004
+
+ C. Display the name and age of all dogs that are female and over 35lbs.
+
+      SELECT name, age
+      FROM dogs
+      WHERE gender = 'F' AND weight > 35;
+
+      RESULTS:
+         name   | age
+      ----------+-----
+       Munchkin |   0
+       Lassie   |   7
+
+ D. Display all of the information about all dogs that are not Shepherd mixes.
+
+      SELECT *
+      FROM dogs
+      WHERE breed NOT LIKE '%shepherd%';
+
+      RESULTS:
+        id   |   name    | gender | age | weight |       breed        | intake_date | in_foster
+      -------+-----------+--------+-----+--------+--------------------+-------------+------------
+       10001 | Boujee    | F      |   3 |     36 | labrador poodle    | 2017-06-22  |
+       10002 | Munchkin  | F      |   0 |      8 | dachsund chihuahua | 2017-01-13  | 2017-01-31
+       10004 | Marley    | M      |   0 |     10 | labrador           | 2017-05-04  | 2016-06-20
+       10006 | Marmaduke | M      |   7 |    150 | great dane         | 2016-03-22  | 2016-05-15
+       10007 | Rosco     | M      |   5 |    180 | rottweiler         | 2017-04-01  |
+
+ E. Display the id, age, weight, and breed of all dogs that are either over 60lbs or Great Danes.
+
+      SELECT id, age, weight, breed
+      FROM dogs
+      WHERE weight > 60 OR breed = 'great dane';
+
+      RESULTS:
+        id   | age | weight |   breed
+      -------+-----+--------+------------
+       10006 |   7 |    150 | great dane
+       10007 |   5 |    180 | rottweiler
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Given a table called cats with the following data:
+
+
+Cats
+
+| id    | name     |gender |age |intake_date | adoption_date |
+| ----- | -------- | ----- |----|------------|---------------|
+| 00001 | Mushi    | M     | 1  | 01-09-2016 | 03-22-2016    |
+| 00002 | Seashell | F     | 7  | 01-09-2016 |               |
+| 00003 | Azul     | M     | 3  | 01-11-2016 | 04-17-2016    |
+| 00004 | Victoire | M     | 7  | 01-11-2016 | 09-01-2016    |
+| 00005 | Nala     | F     | 1  | 01-12-2016 |               |
+
+
+4. From the cats table, what pieces of data would be returned from these queries?
+
+  * SELECT name, adoption_date FROM cats;
+
+   | name     | adoption_date |
+   | -------- |---------------|
+   | Mushi    | 03-22-2016    |
+   | Seashell |               |
+   | Azul     | 04-17-2016    |
+   | Victoire | 09-01-2016    |
+   | Nala     |               |
+
+
+  * SELECT name, age FROM cats;
+
+    | name     | age |
+    | ------   |-----|
+    | Mushi    | 1   |
+    | SeaShell | 7   |
+    | Azul     | 3   |
+    | Victoire | 7   |
+    | Nala     | 1   |
+
+5. From the cats table, write queries to select the following pieces of data.
+     - Display all the information about all of the available cats.
+
+            SELECT *
+            FROM cats
+            WHERE adoption_date IS NULL;
+
+            RESULTS:
+             id |   name   | gender | age | intake_date | adoption_date
+            ----+----------+--------+-----+-------------+---------------
+              2 | Seashell | F      |   7 | 2016-01-09  |
+              5 | Nale     | F      |   1 | 2016-01-12  |
+
+
+     - Choose one cat of each age to show to potential adopters.
+
+            SELECT name
+            FROM cats
+            WHERE gender = 'M' OR adoption_date != null;
+
+            RESULTS:
+                name
+              ----------
+                Mushi
+                Azul
+                Victoire
+
+
+    - Find all of the names of the cats, so you don’t choose duplicate names for new cats.
+
+            SELECT name
+            FROM cats;
+
+            RESULTS:
+              name
+            ----------
+              Mushi
+              Seashell
+              Azul
+              Victoire
+              Nale
+
+6. List each comparison operator and explain, in your own words, when you would use it.
+   Include a real world example for each.
+
+   Comparison operators: <, >, <=, >=, =, !=(<>), IN, NOT. BETWEEN, IS NULL, IS NOT NULL, LIKE, EXISTS
+*** For real world examples, I have a suppliers table with the columns, supplier_id, supplier_name, city, state.***
+
+      = : Checks if the values of two operands are equal or not.  If yes, then the condition becomes true.
+            For example, I want to test the equality of a query. And return all rows where the supplier is equal to Microsoft.
+
+              SELECT *
+              FROM suppliers
+              WHERE supplier_name = 'Microsoft';
+
+      <> or != : the inequality operator will test the inequality in a query.  For example, I want to return all rows that
+                 does not have the supplier_name to equal Microsoft.
+
+              SELECT *
+              FROM suppliers
+              WHERE supplier_name <> 'Microsoft';
+
+
+      > : Greater than comparison operator. Used to test for an expression that is great than.
+            For example, I want all suppliers that have a customer id that is greater than 6000.
+
+            SELECT *
+            FROM suppliers
+            WHERE supplier_id > 6000;
+
+
+      >= : Greater than or equal comparison operator. Used to test for an expression that is equal to or
+            greater than.  For example, I only want to pull the information for suppliers that have a
+            customer_id greater and including 6000.
+
+            SELECT *
+            FROM suppliers
+            WHERE supplier_id >= 6000;
+
+      < : Less than comparison operator.  Used to test if the expression is less than the entered value.
+          For example, I only want the suppliers with a supplier_id that is less than 6000.
+
+            SELECT *
+            FROM suppliers
+            WHERE supplier_id < 6000;
+
+      <= :  The less than or equal to operator.  Used to test of the expression is less that or equal to the queried value.
+            For example, I only want to pull the rows of the suppliers that have a supplier_id less than or of 6000.
+            SELECT *
+            FROM suppliers
+            WHERE supplier_id <= 6000;
+
+      IN():  This operator allows you to test if an expression matches any value in a list of values. If any of the values
+             matches the expression, then the IN condition will evaluate to be true.
+             For example, I want to find all the suppliers that have a specific word in the supplier name.
+
+             SELECT *
+             FROM suppliers
+             WHERE supplier_name IN ('Microsoft', 'Oracle', 'Flower Food');
+
+      NOT:   This operator is used to negate a condition.  Therefor, the opposite of the condition must be
+             met for the record to be included in the result set.
+             For example, if I want to find supplies that do not have a specific word in the supplier name.
+
+             SELECT *
+             FROM suppliers
+             WHERE supplier_name NOT IN ('NovoEd', 'Bradley', 'Bread');
+
+  BETWEEN:   This operator is used to allow you to easily test if an expression is within a range of values.
+              This will return a range of inclusive values.
+              For example, if I want to return all the suppliers that have the suppliers id between
+              the range of 300 and 600, inclusively.
+
+              SELECT *
+              FROM suppliers
+              WHERE supplier_id BETWEEN 300 AND 600;
+
+    IS NULL:  To test for a NULL value.  It will return true if a NULL value is found, otherwise it will
+              return false.
+              For example, I want to find the suppliers where the city column is NULL.
+
+              SELECT *
+              FROM suppliers
+              WHERE city IS NULL;
+
+IS NOT NULL:  Used to test for a non-NULL value. It will return true of a non-NULL valid is found, otherwise
+              it returns false.
+              For example, I want to return all rows where the supplier_name is not null.
+
+              SELECT *
+              FROM suppliers
+              WHERE supplier_name IS NOT NULL;
+
+      LIKE:   The LIKE condition allows wildcards to be used to perform pattern matching in a query.
+              For example, I want to find all of the records in the suppliers table with the suppliers
+              name that begins with 'J'.
+
+              SELECT *
+              FROM suppliers
+              WHERE supplier_name LIKE 'J%'
+
+      EXITS:  The EXISTS condition is used in combination with a subquery and is met if the subquery
+              returns at least one row.
+              For example, I want to find all records in the suppliers table where the supplier_id value
+              appears in the orders table.
+
+              SELECT *
+              FROM suppliers
+              WHERE EXISTS
+                (SELECT *
+                FROM orders
+                WHERE suppliers.supplier_id = orders.suppliers_id);
+
+
+
+
+7. From the cats table (problem 4), what data would be returned from these queries?
+
+  *SELECT name FROM cats WHERE gender = ‘F’;
+
+          name
+        ----------
+        Seashell
+        Nale
+
+  *SELECT name FROM cats WHERE age <> 3;
+
+          name
+        ----------
+        Mushi
+        Seashell
+        Victoire
+        Nale
+
+  *SELECT ID FROM cats WHERE name != ‘Mushi’ AND gender = ‘M’;
+
+             id
+            ----
+            3
+            4

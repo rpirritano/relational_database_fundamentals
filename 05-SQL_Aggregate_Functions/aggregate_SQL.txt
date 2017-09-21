@@ -1,0 +1,79 @@
+1. List 5 aggregate functions and explain, in your own words, what they are for.
+  Include a real world example for each.
+
+   -> SUM, AVG, COUNT, MIN, MAX
+     - For the example, I have a Products table with the following columns:
+        ProductId, ProductName, SupplierID, CategoryID, Unit, and Price
+
+   SUM -> Returns the total sum of a numeric column.
+    For example, I want to get a total price of all the products of the table:
+        SELECT SUM(Price)
+        FROM Products;
+
+    AVG -> Returns the average of a numeric column.
+      For example, I want to get the average price for all the products:
+        SELECT AVG(Price)
+        FROM Products;
+
+    COUNT -> This function will return the number of rows that matches a specified criteria.
+      For example, I want to count the total number of products in the table.
+        SELECT COUNT(ProductID)
+        FROM Products;
+
+    MAX ->  This function will return the largest value of the selected column.
+      For example, I want to find the price of the most expensive product:
+        SELECT MAX(Price) AS LargestPrice
+        FROM Products;
+
+    MIN -> This function will return the smallest value of the selected column.
+      For example, I want to find the price of the cheapest product:
+        SELECT MIN(Price) AS SmallestPrice
+        FROM Products;
+
+2. Given a donations table above with the columns id, donor, amount, and date select the following pieces of data:
+
+  *** Waiting for correct table**
+
+
+3. How would you determine the display order of data returned by your SELECT statement?
+
+  *** Waiting for correct table**
+
+4. What is a real world situation where you would use OFFSET?
+
+    If I want to get all but the 10 most expensive products sorted by price.  This can be used to get
+    multi-page results or pagination with SQL.
+
+      SELECT ProductId, ProductName, Price
+      FROM Product
+      ORDER BY Price DESC
+      OFFSET 10 ROWS;
+
+5. Why is it important to use ORDER BY when limiting your results?
+
+  Some databases sort the query in an ascending order by default.  ORDER BY will allow you to sort
+  the data by ascending or descending order and is based on more or more columns to limit the results.
+ ***
+
+6. What is the difference between HAVING and WHERE?
+
+    A WHERE clause is used to filter records before any groupings take place.
+    A HAVING clause is used to filter values after they have been grouped.  Only
+    columns or expressions in the group can be included in HAVING clause's conditions.
+
+    The HAVING clause is used to filter values in a GROUP BY.  The HAVING clause has the ability to compare
+    and filter based on aggregate function results.  Since the WHERE clause filters one row at a time, there
+    isn't a way to evaluate across all rows.  The HAVING clause can handle that since it is evaluated after the
+    grouping is created.
+
+
+7. Correct the following SELECT statement:
+
+    SELECT id, SUM (amount)
+    FROM payment
+    HAVING SUM (amount) > 200;
+
+
+      *** Waiting for correct table**
+
+8.
