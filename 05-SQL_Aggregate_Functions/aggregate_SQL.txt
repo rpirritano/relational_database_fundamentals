@@ -30,14 +30,141 @@
         SELECT MIN(Price) AS SmallestPrice
         FROM Products;
 
-2. Given a donations table above with the columns id, donor, amount, and date select the following pieces of data:
+2. Create a database called iron-bank-foundation. Create a donations table, and import CSV data from this file.
+    Select the following data from the table:
 
-  *** Waiting for correct table**
+    A. Find the total of all donations received in the past year.
+
+        SELECT SUM(amount) AS total_donations_past_year
+        FROM donations
+        WHERE date > current_date - interval '365' day;
+
+
+           total_donations_past_year
+          ---------------------------
+                              993
+
+
+     B. Find the total donations over time per donor.
+     (i.e. Tanysha has donated 3 times with the amounts $25, $30, and $50. Her total is $105.
+
+
+         SELECT donor, SUM(amount) AS total_donated
+         FROM donations
+         GROUP BY donor;
+
+           donor    | total_donated
+        ------------+---------------
+         Samwell    |            20
+         Daario     |            10
+         Brienne    |            75
+         Tyrion     |           120
+         Petyr      |            70
+         Melisandre |            45
+         Bran       |            25
+         Tormund    |            50
+         Ygritte    |            30
+         Gilly      |             7
+         Jon        |            25
+         Arya       |            60
+         Theon      |            20
+         Bronn      |            20
+         Margaery   |           120
+         Missandei  |            90
+         Sansa      |            33
+         Daenerys   |           173
+
+
+    C. What is the average donation per donor?
+
+        SELECT donor, AVG(amount) AS average_donated
+        FROM donations
+        GROUP BY donor;
+
+             donor    |   average_donated
+          ------------+----------------------
+           Samwell    |  20.0000000000000000
+           Daario     |  10.0000000000000000
+           Brienne    |  75.0000000000000000
+           Tyrion     |  40.0000000000000000
+           Petyr      |  70.0000000000000000
+           Melisandre |  45.0000000000000000
+           Bran       |  25.0000000000000000
+           Tormund    |  50.0000000000000000
+           Ygritte    |  30.0000000000000000
+           Gilly      |   7.0000000000000000
+           Jon        |  25.0000000000000000
+           Arya       |  20.0000000000000000
+           Theon      |  10.0000000000000000
+            Bronn      |  20.0000000000000000
+            Margaery   | 120.0000000000000000
+            Missandei  |  22.5000000000000000
+            Sansa      |  33.0000000000000000
+            Daenerys   |  86.5000000000000000
+
+
+      D. How many donations over $100 have been received?
+
+      SELECT COUNT(amount) AS greater_100_donated
+      FROM donations
+      WHERE amount > 100;
+
+        greater_100_donated
+       ---------------------
+                   2
+
+
+      E. What is the largest donation received in a single instance from a single donor?
+
+
+      SELECT donor, MAX(amount) AS max_donated
+      FROM donations
+      GROUP BY donor;
+
+        donor    | max_donated
+     ------------+-------------
+      Samwell    |          20
+      Daario     |          10
+      Brienne    |          75
+      Tyrion     |          60
+      Petyr      |          70
+      Melisandre |          45
+      Bran       |          25
+      Tormund    |          50
+      Ygritte    |          30
+      Gilly      |           7
+      Jon        |          25
+      Arya       |          30
+      Theon      |          15
+      Bronn      |          20
+      Margaery   |         120
+      Missandei  |          30
+      Sansa      |          33
+      Daenerys   |         102
+
+
+      F. What is the smallest donation we’ve received?
+
+            SELECT MIN(amount) AS least_amount_donated
+            FROM donations;
+
+
+                least_amount_donated
+               ----------------------
+                        5
+
 
 
 3. How would you determine the display order of data returned by your SELECT statement?
 
-  *** Waiting for correct table**
+   We can use grouping clauses to organize the returned data.  The type of grouping clause used
+   would be determined by the particular order we are looking for.  For this task we can use
+   DISTINCT, GROUP BY, ORDER BY, and HAVING.
+
+   For the above question to determine the display order of the data returned we can use the ORDER BY
+   keyword.  By default it will sort the records in ascending order.  If wanted the values to be in
+   descending order then I would use the ORDER BY DESC, for example, ORDER BY amount DESC.
+
 
 4. What is a real world situation where you would use OFFSET?
 
@@ -51,9 +178,11 @@
 
 5. Why is it important to use ORDER BY when limiting your results?
 
-  Some databases sort the query in an ascending order by default.  ORDER BY will allow you to sort
-  the data by ascending or descending order and is based on more or more columns to limit the results.
- ***
+    When using LIMIT, it is important to use an ORDER BY that will constrain the result
+    rows into a unique order.  Otherwise you will get an unpredictable subset of query's rows.
+    For example, you might be asking for the 10th - 20th rows, but the 10th - 20th in
+    what order?  This ordering is unknown, unless you specify it in the ORDER BY.
+
 
 6. What is the difference between HAVING and WHERE?
 
@@ -69,11 +198,113 @@
 
 7. Correct the following SELECT statement:
 
-    SELECT id, SUM (amount)
-    FROM payment
-    HAVING SUM (amount) > 200;
+        SELECT id, SUM (amount)
+        FROM payment
+        HAVING SUM (amount) > 200;
+
+        CORRECTION:
+
+            SELECT id, SUM(amount)
+            FROM payment
+            GROUP BY id
+            HAVING SUM(amount) > 100;
 
 
-      *** Waiting for correct table**
+8. Write queries to retrieve the following information.
 
-8.
+      A. From the cats table, list all cats organized by intake date.
+
+              SELECT name, intake_date
+              FROM cats
+              ORDER BY intake_date;
+
+
+              name   | intake_date
+           ----------+-------------
+            Mushi    | 2016-01-09
+            Seashell | 2016-01-09
+            Azul     | 2016-01-11
+            Victoire | 2016-01-11
+            Nale     | 2016-01-12
+
+
+     B.  Given an adoptions table with the columns id, date, adopter, cat, and fee,
+         determine the 5 most recent adoptions to be featured as “Happy Tails” on social media.
+
+             SELECT adopter, cat, adoption_date
+             FROM adoptions
+             WHERE cat IS NOT NULL
+             ORDER BY adoption_date DESC
+             LIMIT 5;
+
+               adopter      |   cat    | adoption_date
+         -------------------+----------+---------------
+          Katie Michaud     | SeaShell | 2017-09-22
+          Alexander Mendoza | Azul     | 2016-04-17
+          Raul Oropeza      | Mushi    | 2016-03-22
+          Brittany White    | Victoire | 2016-02-17
+          Chris Hammett     | Nale     | 2016-02-02
+
+
+
+      C. There is a potential adopter looking for an adult female cat.
+         In the most efficient way possible, from the Cats table,
+         list all female cats 2 or more years old.
+
+         SELECT name, gender, age
+         FROM cats
+         WHERE gender = 'F'
+         AND age >= 2;
+
+             name   | gender | age
+          ----------+--------+-----
+           Seashell | F      |   7
+
+
+
+      D. From the donations table (described in problem #2),
+         find the top 5 donors with the highest cumulative donation amounts
+         to be honored as “Platinum Donors”.
+
+
+           SELECT donor, SUM(amount) AS total_donated
+           FROM donations
+           GROUP BY donor, amount
+           ORDER BY amount DESC
+           LIMIT 5;
+
+               donor   | total_donated
+             ----------+---------------
+              Margaery |           120
+              Daenerys |           102
+              Brienne  |            75
+              Daenerys |            71
+              Petyr    |            70
+
+
+
+         E. From the donations table (described in problem #2),
+            find donors 6-15 with the next highest cumulative donation amounts
+            to be honored as “Gold Donors”.
+
+
+            SELECT donor, SUM(amount) AS total_donated
+            FROM donations
+            GROUP BY donor, amount
+            ORDER BY amount DESC
+            LIMIT 10
+            OFFSET 6;
+
+
+               donor    | total_donated
+            ------------+---------------
+             Tyrion     |            50
+             Tormund    |            50
+             Melisandre |            45
+             Sansa      |            33
+             Missandei  |            30
+             Ygritte    |            30
+             Arya       |            30
+             Bran       |            25
+             Jon        |            25
+             Missandei  |            50
