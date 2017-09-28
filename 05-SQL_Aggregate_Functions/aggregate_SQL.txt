@@ -116,31 +116,14 @@
 
       E. What is the largest donation received in a single instance from a single donor?
 
+          SELECT donor, amount AS max_donated
+          FROM donations
+          ORDER BY amount DESC
+          LIMIT 1;
 
-      SELECT donor, MAX(amount) AS max_donated
-      FROM donations
-      GROUP BY donor;
-
-        donor    | max_donated
-     ------------+-------------
-      Samwell    |          20
-      Daario     |          10
-      Brienne    |          75
-      Tyrion     |          60
-      Petyr      |          70
-      Melisandre |          45
-      Bran       |          25
-      Tormund    |          50
-      Ygritte    |          30
-      Gilly      |           7
-      Jon        |          25
-      Arya       |          30
-      Theon      |          15
-      Bronn      |          20
-      Margaery   |         120
-      Missandei  |          30
-      Sansa      |          33
-      Daenerys   |         102
+                  donor   | max_donated
+                ----------+-------------
+                 Margaery |         120
 
 
       F. What is the smallest donation we’ve received?
@@ -207,7 +190,7 @@
             SELECT id, SUM(amount)
             FROM payment
             GROUP BY id
-            HAVING SUM(amount) > 100;
+            HAVING SUM(amount) > 200;
 
 
 8. Write queries to retrieve the following information.
