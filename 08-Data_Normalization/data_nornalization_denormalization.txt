@@ -1,0 +1,183 @@
+1.  In your own words, explain the benefits of normalization.
+Include a real-world scenario where normalization is necessary.
+
+
+  There are many benefits of normalization that can lead a organization to pursue
+  this process of organizing the columns and tables of a relational database to minimize
+  data repetition.  Some of these main benefits are:
+    1. A smaller database can be maintained more efficiently since normalization will eliminate
+       duplicate data.  Normalization will result in the overall size of the database being reduced.
+    2. Better performance can be seen, as a result of this decrease in size, since data can be accessed
+       more quickly and in less time.  This results in improving the response time and speed.
+    3. Tables will become more narrow, since the normalized tables will be more fine-tuned and have
+       less columns. This will allow for more data records per page.
+    4. Normalization will also result in fewer indexes per table, allowing for faster maintenance tasks, such
+       as index rebuilds.
+    5. Normalization will not create an option of joining only the tables that are needed.
+
+  An example of a real-world scenario where normalization is necessary is with online transactional
+  processing (OLTP).  Normalization is necessary since data modifications, such as inserts, updates, and
+  deletes, will occur rapidly and randomly throughout the stored data.  An example of a OLTP is a bank transactions
+  system
+
+
+2.  List and explain the different normal forms and how they relate to one another,
+    with regard to your real-world scenario in the first question.
+      **** The banking transaction system ***
+
+         First normal form (1NF) - The table is considered to be in first normal form when:
+           - The table has a primary key
+           - No column has multiple values
+           - The non-key attributes depend on the primary key
+
+          * With the the bank transaction system, a bank may want a customer to have an alternative phone number
+           and email address.  In order for the system to be 1NF, the table containing the information
+           will need a separate column for the alternative email and the alternative phone numbers.  This will allow no
+           columns to have multiple values.
+
+          Second normal form (2NF) - The table is considered to be in second normal form when:
+           - The table meets the criteria for the first normal form
+           - No partial dependencies on a concatenated key - This means that for a table that
+             has a primary key, that each column in the table that is not part of the primary
+             key must depend on the key for its existence.  In other words, the question, Can this column
+              exist without one or part of the concatenated primary key?
+
+            *  To be considered 2NF, the above system must in 1NF form to begin with.  To make sure the table is now
+               2NF, the following must be complete.  First, it will be necessary to split up all data that result in
+               many-to-many relationships and store that data as separate tables.  For example, a bank customer can have
+               many types of accounts and accounts can have more than one person associated with it.  2NF states that this
+               relationship will have to be split into more than one table, such as Customer and Accounts.  One way to make
+               sure that there are no direct relationship, a 3rd table can be created to indirectly create the relationships.
+               Next, relationships between the tables will need to be created using foreign keys.  For example, our banking database
+               has two tables, a customer_master and an account_master.  There has to be a link between these two tables
+               to know which customer is for each account.  This will be done via a foreign key, a column in the account_master
+               that will point to a corresponding column in the customer_master table.
+
+
+
+          Third normal key (3NF) - The table is considered to be in third normal form when:
+             - The table must be in 2NF
+             - No dependencies on non-key attributes
+
+                *  For the bank database to be in 3NF, it must satisfy the conditions mentioned above for 1NF
+                  and 2NF.  For 3NF, we have to ensure that the no dependencies on non-key attributes exist.  For example,
+                  as mentioned when created the 2NF requirement, the account_master will have a foreign key, for example CustID,
+                  that will point to the customer_master.  The CustID for a bank customer will refer to and identify the customer
+                  who owns the same CustID in the customers_master table.  No other data, such as name, date of birth, or gender, should be
+                  stored in the account_master table, since all of this data is already stored in the customer_master
+                  table or in another table.  By doing this, only the customer data stored outside the customer_master
+                  table will be the CustId.
+
+
+
+          Boyce Codd normal form (BCNF) - The table is considered to be BCNF when:
+             - The table must be in 3NF
+             - Every partial key can only depend on a super key - A super key is a set of attributes
+               of a relation schema in which all attributes of the schema are functionally dependent.
+
+               *  For BCNF, the bank database must be in 3NF.  BCNF can be considered an extension of the
+                  3NF.  The main difference is that the BCNF can handle a certain anomaly that is not handled
+                  solely by 3NF.  As mentioned above, each partial key can only depend on a super key.
+                  For this example, if each customer has a personal banker, it will be necessary to allow
+                  only one personal banker per branch to a customer. For this example, for the personal banker,
+                  there are two tables: 1. works_in that has emp_id and branch_name; 2. cust_banker that has
+                  cust_id, emp_id, and type.  These tables do not enforce the constraint for each customer to only have
+                  one personal banker per branch.  One solution is to create a many-to-one relationship of the customer and
+                  employee to the branch.  In other words, through the database schema, we enforced that only
+                  one personal banker per customer, per branch.
+
+3.  The following student_records table shows the students and their grades in different subjects.
+    The table is already in first normal form (1NF). Convert this table to the third normal form (3NF)
+    using the techniques you learned in this checkpoint.
+
+    | entry_id | student_id | professor_id | subject     | grade | professor_name | student_email            | student_name |
+    |----------|------------|--------------|-------------|-------|----------------|--------------------------|--------------|
+    | 1        | 1          | 2            | Philosophy  | A     | William C      | john.b20@hogwarts.edu    | John B       |
+    | 2        | 2          | 2            | Philosophy  | C     | William C      | sarah.s20@hogwarts.edu   | Sarah S      |
+    | 3        | 3          | 1            | Economics   | A     | Natalie M      | martha.l20@hogwarts.edu  | Martha L     |
+    | 4        | 4          | 3            | Mathematics | B     | Mark W         | james.g20@hogwarts.edu   | James G      |
+    | 5        | 5          | 1            | Economics   | B     | Natalie M      | stanley.p20@hogwarts.edu | Stanley P    |
+
+
+    ** Put into 2NF **
+        1. attribute professor_name is functionally dependent on attribute profess_id
+                 - (professor_id --> professor_name)
+        2. attribute student_name is functionally dependent on student_id
+                 - (student_id --> student_name)
+        3. attribute grade is functionally dependent on student_id, professor_id --> grade
+
+    ** Put into 3NF**
+          - all non-primary attributes (attributes that are not parts of the primary key
+            or of any candidate key) have non-transitivity dependency on the primary key.
+           - always ask - is this relationship captured elsewhere?
+
+
+        | student_id | student_email            | student_name |
+        |------------|--------------------------|--------------|
+        | 1          | john.b20@hogwarts.edu    | John B       |
+        | 2          | sarah.s20@hogwarts.edu   | Sarah S      |
+        | 3          | martha.l20@hogwarts.edu  | Martha L     |
+        | 4          | james.g20@hogwarts.edu   | James G      |
+        | 5          | stanley.p20@hogwarts.edu | Stanley P    |
+
+        | professor_id | professor_name | subject
+        |--------------|----------------|-------------|
+        | 2            | William C      | Philosophy  |
+        | 1            | Natalie M      | Economics   |
+        | 3            | Mark W         | Mathematics |
+
+
+        | student_id | subject     |
+        |------------|-------------|
+        | 1          | Philosophy  |
+        | 2          | Philosophy  |
+        | 3          | Economics   |
+        | 4          | Mathematics |
+        | 5          | Economics   |
+
+
+        | student_id | professor_id | grade |
+        |------------|--------------|-------|
+        | 1          | 2            | A     |
+        | 2          | 2            | C     |
+        | 3          | 1            | A     |
+        | 4          | 3            | B     |
+        | 5          | 1            | B     |
+
+        *join with student/prof with grade
+
+
+4. In your own words, explain the potential disadvantages of normalizing the data above.
+    What are its trade-offs?
+
+       - One disadvantage is there will be more tables to join when querying data. By spreading
+      out my data into more tables, I have increased the need to join tables.
+       - Another disadvantage is that I have the student_id stored many times, which can cause
+         issues with updating, as well as with looking up the values.
+       - Read times will be increased due to the first disadvantage mentioned above, the
+         queries will be more complicated, thus lead to read times being slower
+       - With joins being required, indexing will not work as efficiently.  This again will
+         make the read times slower since joins do not work always well with indexing.
+
+      Tradeoffs:
+          The reduced redundancy will make retrieval of data less efficient since the data might have
+          to be retrieved from several tables.  However, the normal form will improve the performance
+          of updates and deletions, which are important in this type of database.  The normalization will
+          also result is less data storage due to less data redundancy.  So the main tradeoff for this increased
+          integrity by decreasing data redundancy and inconsistency will be the performance cost.
+
+5.  Looking at the tables you have normalized. If you need to denormalize to improve query performance or speed up reporting,
+    how would you carry out denormalization for this database design?
+
+        I would examine the above tables to use extra attributes in an existing table or add a new table if necessary.
+          - I would create a course table to list all the course information and use the professor_id as a foreign key.
+          - I would have the instructors table not list the course, but only the information for the instructor and use
+            a course_id as the foreign key since an instructor may not always teach a particular course.
+          - I would create a gradebook table to hold grades with course_id and student_id as foreign keys
+
+
+6. Discuss the trade-offs between data normalization and denormalization in this scenario.
+
+      This will increase the number of tables, which will effect the performance of a queue, such as
+      needing to join more tables.  I think this will be a better tradeoff since now there will be less
+      duplication of data and less issues with updating/deleting data.
