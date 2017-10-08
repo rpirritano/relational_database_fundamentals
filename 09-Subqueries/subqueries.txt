@@ -1,0 +1,275 @@
+1.  Explain a subquery in your own words.
+
+    A subquery, also known as a nested query, is a query that is within
+    another SQL query and is embedded within the WHERE clause.  The subquery
+    can be used with the SELECT, INSERT, UPDATE, and DELETE statements.  A
+    subquery is used to return data that will be used in the main query as a
+    condition to further restrict the data to be retrieved.
+
+2. Where can you use a subquery within a SELECT statement?
+
+    A subquery can be used in a SELECT clause, a FROM clause, or a WHERE clause and
+    can be nested insides a SELECT, INSERT, UPDATE, and DELETE statement or inside
+    another subquery.
+
+3. When would you employ a subquery?
+
+    You would use a subquery when you want to perform the following tasks:
+         - Compare an expression to the result of the query
+         - Determine if an expression is included in the results of a query
+         - Check whether the query selects any rows
+
+4. Explain a row constructor in your own words.
+
+    A row constructor will define an ordered set of values that make up one row of data.
+
+5. What happens if a row in the subquery result provides a NULL value to the comparison?
+
+    Then no rows will be returned by the outer query
+
+
+6. What are the ways to use a subquery within a WHERE clause?
+
+    You can use a subquery within a WHERE clause with the following:
+      - With a row constructor
+      - EXISTS, IN, NOT IN, ALL, ANY, SOME, NOT EXISTS
+
+7. Build an employees table and a shifts table with appropriate primary and foreign keys.
+    Then, write queries to find the following information:
+         * List all employees and all shifts.
+
+            SELECT employees.last_name, shift.shift_name
+            FROM employees, shift
+            WHERE employees.employee_id = shift.employee_id;
+
+              last_name  |    shift_name
+             ------------+------------------
+              Washington | Early Shift
+              Adams      | Late Shift
+              Jefferson  | Mid-day Shift
+              Madison    | All-day Shift
+              Monroe     | Midnight Shift
+              Martinez   | Clean-up
+              Oropeza    | Lunch
+              Nelson     | Dinner
+              Nelson     | Snack
+              Pickens    | Late Night Snack
+
+
+8.  Given a dogs table, adoptions table, adopters table, and volunteers table , write queries to retrieve the following information.
+    All tables are described below.
+        * Create a list of all volunteers. If the volunteer is fostering a dog, include each dog as well.
+
+            SELECT name, (SELECT name FROM dogs WHERE dogs.foster_id = volunteers.foster_id) AS foster_dog
+            FROM volunteers;
+
+                    name      | foster_dog
+              ----------------+------------
+               Mary Moore     | Munchkin
+               Julie Adams    |
+               Andrea Ruiz    |
+               Andrea Lyman   | Marley
+               Brittany White | Lassie
+
+
+        * List the adopter’s name and the pet’s name for each animal adopted within the past month
+          to be displayed as a ‘Happy Tail’ on social media.
+
+            SELECT adopters.first_name, p.adoption_date
+            FROM adopters
+            INNER JOIN
+            (SELECT adoption_id, adoption_date
+            FROM adoptions
+            WHERE adoption_date > (CURRENT_DATE - INTERVAL '30 days')) as p
+            ON adopters.adoption_id = p.adoption_id;
+
+             first_name | adoption_date
+            ------------+---------------
+             Katie      | 2017-09-22
+             Andrea     | 2017-10-01
+             Raul       | 2017-10-05
+             Julie      | 2017-09-15
+
+
+        * Display a list of all cats and all dogs who have not been adopted.
+
+              SELECT name
+              FROM adoptions
+              WHERE adoption_date IS NULL;
+
+                  name
+                ----------
+                Seashell
+                Nale
+                Boujee
+                Rosco
+
+
+        * Create a list of volunteers who are available to foster.
+          If they currently are fostering a dog, include the dog.
+
+         SELECT volunteers.name AS available_volunteers, dogs.name AS foster_dog
+         FROM volunteers
+         LEFT OUTER JOIN dogs ON volunteers.foster_id = dogs.foster_id;
+
+
+10. Given the tables books (isbn, title, author), transactions (id, checked_out_date, checked_in_date, user_id, isbn),
+    holds (id, isbn, user_id, rank, date), and patrons (id, name, fine_amount),
+    write queries to find the following information:
+
+      * To discern if the library should buy more copies of a given book,
+        please provide the names and position, in order, of all of the patrons
+        waiting in line for Harry Potter and the Sorcerer’s Stone.
+
+         SELECT patrons.name, waiting.rank
+         FROM patrons
+         INNER JOIN
+         (SELECT user_id, rank
+         FROM holds
+         WHERE isbn = 1-65789-043-6
+         GROUP BY user_id, rank) AS waiting
+         ON patrons.id = waiting.user_id
+         ORDER BY waiting.rank;
+
+                      name        | rank
+                ------------------+------
+                 Anthony Nelson   |    1
+                 Brandon Martinez |    2
+                 Fiocco Fiore     |    3
+
+
+      * Make a list of all book titles and denote whether or not a copy of that book is
+        checked out.
+
+            SELECT books.title, t.checked_in_date
+            FROM books
+            INNER JOIN
+            (SELECT user_id, isbn, checked_in_date
+            FROM transactions) AS t
+            ON books.isbn = t.isbn;
+
+
+                           title                   | checked_in_date
+         ------------------------------------------+-----------------
+          Designing Object-Oriented Software       | 2009-04-04
+          Practical Object-Oriented Design in Ruby |
+          JavaScript: The Good Parts               | 2010-04-04
+          Eloquent Ruby                            | 2017-09-01
+          Harry Potter and the Sorcerer Stone      | 2017-09-11
+
+
+
+      * In an effort to learn which books take longer to read,
+        the librarians would like you to create a list of total checked out time by book name
+        in the past month.
+
+          SELECT books.title, t.total_checked_out_time_in_days
+          FROM books
+          INNER JOIN
+          (SELECT isbn, checked_in_date - checked_out_date AS total_checked_out_time_in_days
+          FROM transactions
+          WHERE checked_in_date < (CURRENT_DATE - INTERVAL '30 days')) AS t
+          ON books.isbn = t.isbn;
+
+
+                                     title                | total_checked_out_time_in_days
+                      ------------------------------------+--------------------------------
+                       Eloquent Ruby                      |                            243
+                       JavaScript: The Good Parts         |                             58
+                       Designing Object-Oriented Software |                             58
+
+
+         * In order to learn which items should be retired, make a list of all books that have not
+           been checked out in the past 5 years.
+
+                  SELECT books.title, t.checked_in_date
+                  FROM books
+                  INNER JOIN
+                  (SELECT isbn, checked_in_date
+                   FROM transactions
+                   WHERE transactions.checked_in_date < (CURRENT_DATE - INTERVAL '5 years')) AS t
+                   ON books.isbn = t.isbn;
+
+
+                                     title                | checked_in_date
+                      ------------------------------------+-----------------
+                       JavaScript: The Good Parts         | 2010-04-04
+                       Designing Object-Oriented Software | 2009-04-04
+
+
+         * List all of the library patrons. If they have one or more books checked out,
+           correspond the books to the patrons.
+
+
+                  SELECT patrons.name, b.title, t.isbn
+                  FROM patrons
+                  INNER JOIN
+                  (SELECT user_id, isbn, checked_in_date
+                  FROM transactions) AS t
+                  ON patrons.id = t.user_id
+                  INNER JOIN
+                  (SELECT title, isbn
+                  FROM books) as b
+                  ON b.isbn = t.isbn;
+
+
+                          name      |   isbn   |                  title
+                    ----------------+----------+------------------------------------------
+                     Fiocco Fiore   |   -85017 | JavaScript: The Good Parts
+                     Fiocco Fiore   |   -84386 | Eloquent Ruby
+                     Anthony Nelson |   -65837 | Harry Potter and the Sorcerer Stone
+                     Nina Gibson    | -9752301 | Designing Object-Oriented Software
+                     Nina Gibson    |   -85135 | Practical Object-Oriented Design in Ruby
+
+
+11. Given the following tables in an airliner database, find the following information.
+      airplanes (model, seat capacity, range),
+      flights(flight_number, destination, origin, company, distance, flight_time, airplane_model),
+      transactions(id, seats_sold, total_revenue, total_cost, flight_number, date)
+
+
+      * To determine the most profitable airplanes, find all airplane models where each flight has had
+        over 100 paying customers in the past month.
+
+              SELECT airplane_model
+              FROM flights
+              INNER JOIN
+              (SELECT flight_number, seats_sold
+               FROM transactions
+               WHERE COUNT(seats_sold) > 100) AS s
+               ON flights.flight_number = transactions.flight_number;
+
+
+
+      *  To determine the most profitable flights, find all destination-origin pairs
+          where 90% or more of the seats have been sold in the past month.
+
+              SELECT destination, origin
+              FROM flights
+              INNER JOIN
+              (SELECT flight_number, seats_sold
+              FROM transactions
+              WHERE COUNT(seat-sold) > .9) AS t
+              ON flights.flight_number = transactions.flight_number;
+
+
+
+      * The airline is looking to expand its presence in the US Southeast and globally.
+        Find the total revenue of any flight arriving at or departing from Atlanta.
+
+              SELECT SUM(total_revenue)
+              FROM transactions
+              INNER JOIN
+              (SELECT flight_number, destination
+              FROM flights) as f
+              ON transactions.flight_number = flights.flight_number;
+
+12. Compare the subqueries you've written above. Compare them to the joins you wrote in Checkpoint 6.
+    Which ones are more readable? Which were more logical to write?
+
+              In most of the cases above, I prefer using joins.  For me, I feel like they are more readable since
+              there are less SELECTS.  I do see that it was beneficial to have the subquery first run
+              to limit the amount of data that the outer query would then run on. I do feel that this would be
+              beneficial in scenarios that the data set we are dealing with is much larger.  In conclusion, I see
+              the benefits of using the subqueries, but in most cases I prefer using joins when that benefit does not
+              out weigh my personal preference.
