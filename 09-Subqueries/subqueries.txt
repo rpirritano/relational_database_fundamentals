@@ -8,9 +8,8 @@
 
 2. Where can you use a subquery within a SELECT statement?
 
-    A subquery can be used in a SELECT clause, a FROM clause, or a WHERE clause and
-    can be nested insides a SELECT, INSERT, UPDATE, and DELETE statement or inside
-    another subquery.
+    A subquery can be used in a SELECT clause, a FROM clause, or a WHERE clause
+    or inside another subquery.
 
 3. When would you employ a subquery?
 
@@ -38,9 +37,10 @@
     Then, write queries to find the following information:
          * List all employees and all shifts.
 
-            SELECT employees.last_name, shift.shift_name
-            FROM employees, shift
-            WHERE employees.employee_id = shift.employee_id;
+            SELECT employees.last_name, s.shift_name
+            FROM employees,
+            (SELECT shift_name, employee_id FROM shift) AS s
+            WHERE employees.employee_id = s.employee_id;
 
               last_name  |    shift_name
              ------------+------------------
@@ -56,6 +56,18 @@
               Pickens    | Late Night Snack
 
 
+          * Create a list of all possible schedules.
+
+              SELECT employees.last_name, s.shift_name
+              FROM employees,
+              (SELECT shift_name, employee_id FROM shift) AS s;
+
+              OR
+
+              SELECT employees.last_name, shift.shift_name
+              FROM employees, shift;
+
+
 8.  Given a dogs table, adoptions table, adopters table, and volunteers table , write queries to retrieve the following information.
     All tables are described below.
         * Create a list of all volunteers. If the volunteer is fostering a dog, include each dog as well.
@@ -63,32 +75,62 @@
             SELECT name, (SELECT name FROM dogs WHERE dogs.foster_id = volunteers.foster_id) AS foster_dog
             FROM volunteers;
 
-                    name      | foster_dog
-              ----------------+------------
-               Mary Moore     | Munchkin
-               Julie Adams    |
-               Andrea Ruiz    |
-               Andrea Lyman   | Marley
-               Brittany White | Lassie
+                   name      | foster_dog
+             ----------------+------------
+              Mary Moore     |
+              Julie Adams    |
+              Andrea Ruiz    |
+              Andrea Lyman   |
+              Brittany White | Lassie
 
 
         * List the adopter’s name and the pet’s name for each animal adopted within the past month
           to be displayed as a ‘Happy Tail’ on social media.
 
-            SELECT adopters.first_name, p.adoption_date
-            FROM adopters
-            INNER JOIN
-            (SELECT adoption_id, adoption_date
-            FROM adoptions
-            WHERE adoption_date > (CURRENT_DATE - INTERVAL '30 days')) as p
-            ON adopters.adoption_id = p.adoption_id;
+              SELECT adopters.first_name AS adopter, p.name AS pet, p.adoption_date
+              FROM adopters,
+              (SELECT adoption_id, name, adoption_date
+                FROM adoptions
+                WHERE adoption_date > (CURRENT_DATE - INTERVAL '30 days')) as p
+              WHERE adopters.adoption_id = p.adoption_id;
 
-             first_name | adoption_date
-            ------------+---------------
-             Katie      | 2017-09-22
-             Andrea     | 2017-10-01
-             Raul       | 2017-10-05
-             Julie      | 2017-09-15
+                        adopter |   pet    | adoption_date
+                    ------------+----------+---------------
+                     Katie      | Mushi    | 2017-09-22
+                     Andrea     | Munchkin | 2017-10-01
+                     Raul       | Lassie   | 2017-10-05
+
+
+        * Create a list of adopters who have not yet chosen a dog to adopt and generate all possible combinations
+          of adopters and available dogs.
+
+             SELECT t.name AS volunteer, dogs.name AS dog
+             FROM dogs,
+             (SELECT name, adoption_id
+              FROM volunteers
+              WHERE adoption_id IS NOT NULL) as t;
+
+
+                volunteer      |   dog
+               ----------------+-----------
+                Mary Moore     | Boujee
+                Andrea Lyman   | Boujee
+                Brittany White | Boujee
+                Mary Moore     | Munchkin
+                Andrea Lyman   | Munchkin
+                Brittany White | Munchkin
+                Mary Moore     | Marley
+                Andrea Lyman   | Marley
+                Brittany White | Marley
+                Mary Moore     | Lassie
+                Andrea Lyman   | Lassie
+                Brittany White | Lassie
+                Mary Moore     | Marmaduke
+                Andrea Lyman   | Marmaduke
+                Brittany White | Marmaduke
+                Mary Moore     | Rosco
+                Andrea Lyman   | Rosco
+                Brittany White | Rosco
 
 
         * Display a list of all cats and all dogs who have not been adopted.
@@ -108,9 +150,18 @@
         * Create a list of volunteers who are available to foster.
           If they currently are fostering a dog, include the dog.
 
-         SELECT volunteers.name AS available_volunteers, dogs.name AS foster_dog
-         FROM volunteers
-         LEFT OUTER JOIN dogs ON volunteers.foster_id = dogs.foster_id;
+          SELECT volunteers.name, d.name
+          FROM volunteers,
+          (SELECT dogs.name
+            FROM dogs, volunteers
+            WHERE dogs.foster_id = volunteers.foster_id) AS d
+          WHERE available_to_foster = 't';
+
+               name      |  name
+         ----------------+--------
+          Mary Moore     |
+          Andrea Lyman   |
+          Brittany White | Lassie
 
 
 10. Given the tables books (isbn, title, author), transactions (id, checked_out_date, checked_in_date, user_id, isbn),
@@ -121,15 +172,14 @@
         please provide the names and position, in order, of all of the patrons
         waiting in line for Harry Potter and the Sorcerer’s Stone.
 
-         SELECT patrons.name, waiting.rank
-         FROM patrons
-         INNER JOIN
-         (SELECT user_id, rank
-         FROM holds
-         WHERE isbn = 1-65789-043-6
-         GROUP BY user_id, rank) AS waiting
-         ON patrons.id = waiting.user_id
-         ORDER BY waiting.rank;
+            SELECT patrons.name, waiting.rank
+            FROM patrons,
+            (SELECT user_id, rank
+              FROM holds
+              WHERE isbn = 1-65789-043-6
+              GROUP BY user_id, rank) AS waiting
+            WHERE patrons.id = waiting.user_id
+            ORDER BY waiting.rank;
 
                       name        | rank
                 ------------------+------
@@ -142,18 +192,17 @@
         checked out.
 
             SELECT books.title, t.checked_in_date
-            FROM books
-            INNER JOIN
+            FROM books,
             (SELECT user_id, isbn, checked_in_date
-            FROM transactions) AS t
-            ON books.isbn = t.isbn;
+              FROM transactions) AS t
+            WHERE books.isbn = t.isbn;
 
 
                            title                   | checked_in_date
          ------------------------------------------+-----------------
-          Designing Object-Oriented Software       | 2009-04-04
+          Designing Object-Oriented Software       |
           Practical Object-Oriented Design in Ruby |
-          JavaScript: The Good Parts               | 2010-04-04
+          JavaScript: The Good Parts               |
           Eloquent Ruby                            | 2017-09-01
           Harry Potter and the Sorcerer Stone      | 2017-09-11
 
@@ -163,13 +212,12 @@
         the librarians would like you to create a list of total checked out time by book name
         in the past month.
 
-          SELECT books.title, t.total_checked_out_time_in_days
-          FROM books
-          INNER JOIN
-          (SELECT isbn, checked_in_date - checked_out_date AS total_checked_out_time_in_days
-          FROM transactions
-          WHERE checked_in_date < (CURRENT_DATE - INTERVAL '30 days')) AS t
-          ON books.isbn = t.isbn;
+            SELECT books.title, t.total_checked_out_time_in_days
+            FROM books,
+            (SELECT isbn, checked_in_date - checked_out_date AS total_checked_out_time_in_days
+              FROM transactions
+              WHERE transactions.checked_in_date < (CURRENT_DATE - INTERVAL '30 days')) AS t
+            WHERE books.isbn = t.isbn;
 
 
                                      title                | total_checked_out_time_in_days
@@ -182,13 +230,12 @@
          * In order to learn which items should be retired, make a list of all books that have not
            been checked out in the past 5 years.
 
-                  SELECT books.title, t.checked_in_date
-                  FROM books
-                  INNER JOIN
-                  (SELECT isbn, checked_in_date
-                   FROM transactions
-                   WHERE transactions.checked_in_date < (CURRENT_DATE - INTERVAL '5 years')) AS t
-                   ON books.isbn = t.isbn;
+                SELECT books.title, t.checked_in_date
+                FROM books,
+                (SELECT isbn, checked_in_date
+                  FROM transactions
+                  WHERE transactions.checked_in_date < (CURRENT_DATE - INTERVAL '5 years')) AS t
+                WHERE books.isbn = t.isbn;
 
 
                                      title                | checked_in_date
@@ -201,16 +248,14 @@
            correspond the books to the patrons.
 
 
-                  SELECT patrons.name, b.title, t.isbn
-                  FROM patrons
-                  INNER JOIN
-                  (SELECT user_id, isbn, checked_in_date
-                  FROM transactions) AS t
-                  ON patrons.id = t.user_id
-                  INNER JOIN
-                  (SELECT title, isbn
-                  FROM books) as b
-                  ON b.isbn = t.isbn;
+              SELECT patrons.name, b.title, t.isbn
+              FROM patrons,
+              (SELECT user_id, isbn, checked_in_date
+              FROM transactions) AS t,
+              (SELECT title, isbn
+              FROM books) as b
+              WHERE patrons.id = t.user_id
+              AND b.isbn = t.isbn;
 
 
                           name      |   isbn   |                  title
@@ -231,45 +276,50 @@
       * To determine the most profitable airplanes, find all airplane models where each flight has had
         over 100 paying customers in the past month.
 
-              SELECT airplane_model
-              FROM flights
-              INNER JOIN
-              (SELECT flight_number, seats_sold
-               FROM transactions
-               WHERE COUNT(seats_sold) > 100) AS s
-               ON flights.flight_number = transactions.flight_number;
+                SELECT flights.model
+                FROM flights
+                WHERE flights.flight_number IN
+                (SELECT flight_number
+                  FROM transactions
+                  WHERE seats_sold > 100
+                  AND date < (CURRENT_DATE - INTERVAL '30 days'));
 
 
 
       *  To determine the most profitable flights, find all destination-origin pairs
           where 90% or more of the seats have been sold in the past month.
 
-              SELECT destination, origin
-              FROM flights
-              INNER JOIN
-              (SELECT flight_number, seats_sold
-              FROM transactions
-              WHERE COUNT(seat-sold) > .9) AS t
-              ON flights.flight_number = transactions.flight_number;
+
+            SELECT transactions.flight_number
+            FROM transactions,
+            (SELECT airplanes.model, airplanes.seat_capacity, flights.flight_number
+              FROM airplanes, flights
+              WHERE airplanes.model = flights.model
+              GROUP BY airplanes.model, airplanes.seat_capacity, flights.flight_number
+              HAVING COUNT(destination) > 1 AND COUNT(origin) > 1) d
+            WHERE transactions.flight_number = d.flight_number
+            AND (transactions.seats_sold / d.seat_capacity) > .90;
 
 
 
       * The airline is looking to expand its presence in the US Southeast and globally.
         Find the total revenue of any flight arriving at or departing from Atlanta.
 
-              SELECT SUM(total_revenue)
-              FROM transactions
-              INNER JOIN
-              (SELECT flight_number, destination
-              FROM flights) as f
-              ON transactions.flight_number = flights.flight_number;
+              SELECT transactions.flight_number, SUM(transactions.total_revenue)
+              FROM transactions,
+              (SELECT flight_number, origin, destination
+                FROM flights
+                WHERE origin = 'Atlanta' OR destination = 'Atlanta') as f
+              WHERE transactions.flight_number = f.flight_number
+              GROUP BY transactions.flight_number;
+
 
 12. Compare the subqueries you've written above. Compare them to the joins you wrote in Checkpoint 6.
     Which ones are more readable? Which were more logical to write?
 
-              In most of the cases above, I prefer using joins.  For me, I feel like they are more readable since
-              there are less SELECTS.  I do see that it was beneficial to have the subquery first run
-              to limit the amount of data that the outer query would then run on. I do feel that this would be
-              beneficial in scenarios that the data set we are dealing with is much larger.  In conclusion, I see
-              the benefits of using the subqueries, but in most cases I prefer using joins when that benefit does not
-              out weigh my personal preference.
+              In the cases above, the subqueries that had less conditions seem to be easier to read than the
+              corresponding join from checkpoint 6.  In these cases, it was easier to see what the outer query was going to
+              use from the inner query to pull the data.  For the more complex queries the joins were easier to write
+              and were more readable.  I feel that it can be a personal preference of which to use, however; it may be
+              more logical to use a subquery for instances that the data from the subquery will make the full query quicker
+              to run.
