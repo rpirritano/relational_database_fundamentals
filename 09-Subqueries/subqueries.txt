@@ -58,6 +58,7 @@
 
           * Create a list of all possible schedules.
 
+
               SELECT employees.last_name, s.shift_name
               FROM employees,
               (SELECT shift_name, employee_id FROM shift) AS s;
@@ -71,6 +72,7 @@
 8.  Given a dogs table, adoptions table, adopters table, and volunteers table , write queries to retrieve the following information.
     All tables are described below.
         * Create a list of all volunteers. If the volunteer is fostering a dog, include each dog as well.
+
 
             SELECT name, (SELECT name FROM dogs WHERE dogs.foster_id = volunteers.foster_id) AS foster_dog
             FROM volunteers;
@@ -87,18 +89,17 @@
         * List the adopter’s name and the pet’s name for each animal adopted within the past month
           to be displayed as a ‘Happy Tail’ on social media.
 
-              SELECT adopters.first_name AS adopter, p.name AS pet, p.adoption_date
+
+              SELECT adopters.first_name AS adopter, p.cat, p.dog, p.adoption_date
               FROM adopters,
-              (SELECT adoption_id, name, adoption_date
+              (SELECT adoption_id, cat, dog, adopter, adoption_date
                 FROM adoptions
                 WHERE adoption_date > (CURRENT_DATE - INTERVAL '30 days')) as p
-              WHERE adopters.adoption_id = p.adoption_id;
+                WHERE adopters.adoption_id = p.adoption_id;
 
-                        adopter |   pet    | adoption_date
-                    ------------+----------+---------------
-                     Katie      | Mushi    | 2017-09-22
-                     Andrea     | Munchkin | 2017-10-01
-                     Raul       | Lassie   | 2017-10-05
+                          adopter |   cat    | dog | adoption_date
+                         ---------+----------+-----+---------------
+                          Katie   | SeaShell |     | 2017-09-22
 
 
         * Create a list of adopters who have not yet chosen a dog to adopt and generate all possible combinations
@@ -135,33 +136,69 @@
 
         * Display a list of all cats and all dogs who have not been adopted.
 
-              SELECT name
+              SELECT cat, dog
               FROM adoptions
               WHERE adoption_date IS NULL;
 
-                  name
-                ----------
-                Seashell
-                Nale
-                Boujee
-                Rosco
+              OR
+
+              SELECT cat, dog
+              FROM adoptions
+              WHERE NOT EXISTS
+              (SELECT adoption_date
+                FROM adoptions);
+
+                        cat     | dog
+                       ---------+-----
+                       Seashell |
+                       Nale     |
+                                | Boujee
+                                | Rosco
 
 
         * Create a list of volunteers who are available to foster.
           If they currently are fostering a dog, include the dog.
 
-          SELECT volunteers.name, d.name
-          FROM volunteers,
-          (SELECT dogs.name
-            FROM dogs, volunteers
-            WHERE dogs.foster_id = volunteers.foster_id) AS d
-          WHERE available_to_foster = 't';
 
-               name      |  name
-         ----------------+--------
-          Mary Moore     |
-          Andrea Lyman   |
-          Brittany White | Lassie
+              SELECT volunteers.name AS volunteer, dog.name
+              FROM volunteers
+              LEFT JOIN
+              (SELECT name, foster_id
+                FROM dogs) AS dog
+              ON dog.foster_id = volunteers.foster_id
+              WHERE available_to_foster = 't'
+              ORDER BY volunteers.name;
+
+                    volunteer    |  name
+                 ----------------+--------
+                  Andrea Lyman   |
+                  Brittany White | Lassie
+                  Mary Moore     |
+
+
+9.  Write a query to find the name of the person who adopted Seashell
+   given the tables cats, adoptions, and adopters.
+
+            SELECT adopter, cat, adoption_date
+            FROM adoptions
+            WHERE cat = 'SeaShell';
+
+                        adopter    |   cat    | adoption_date
+                    ---------------+----------+---------------
+                     Katie Michaud | SeaShell | 2017-09-22
+
+          OR
+
+              SELECT adopter
+              FROM adoptions
+              WHERE cat IN
+              (SELECT name
+                FROM cats
+                WHERE name = 'Seashell');
+
+                    adopter
+                  ---------------
+                  Katie Michaud
 
 
 10. Given the tables books (isbn, title, author), transactions (id, checked_out_date, checked_in_date, user_id, isbn),
@@ -247,7 +284,6 @@
          * List all of the library patrons. If they have one or more books checked out,
            correspond the books to the patrons.
 
-
               SELECT patrons.name, b.title, t.isbn
               FROM patrons,
               (SELECT user_id, isbn, checked_in_date
@@ -276,7 +312,7 @@
       * To determine the most profitable airplanes, find all airplane models where each flight has had
         over 100 paying customers in the past month.
 
-                SELECT flights.model
+                SELECT DISTINCT flights.model
                 FROM flights
                 WHERE flights.flight_number IN
                 (SELECT flight_number
@@ -284,6 +320,11 @@
                   WHERE seats_sold > 100
                   AND date < (CURRENT_DATE - INTERVAL '30 days'));
 
+
+                        model
+                       -------
+                       747
+                       787
 
 
       *  To determine the most profitable flights, find all destination-origin pairs
@@ -301,6 +342,10 @@
             AND (transactions.seats_sold / d.seat_capacity) > .90;
 
 
+                      flight_number
+                     ---------------
+                      2476
+                      3784
 
       * The airline is looking to expand its presence in the US Southeast and globally.
         Find the total revenue of any flight arriving at or departing from Atlanta.
@@ -312,6 +357,13 @@
                 WHERE origin = 'Atlanta' OR destination = 'Atlanta') as f
               WHERE transactions.flight_number = f.flight_number
               GROUP BY transactions.flight_number;
+
+
+                flight_number |  sum
+               ---------------+-------
+                         2476 | 84500
+                         3784 | 45000
+                         4537 | 81000
 
 
 12. Compare the subqueries you've written above. Compare them to the joins you wrote in Checkpoint 6.
